@@ -1,18 +1,24 @@
 version: '3.8'
 
 services:
+  # Nosso serviço de API (será criado depois, opcional para agora)
+  # api: ...
+
+  # Serviço de banco de dados agora usando PostgreSQL
   db:
-    image: mysql:8.0
-    container_name: mysql_estoque_db
+    image: postgres:15-alpine # Imagem oficial e leve do PostgreSQL
+    container_name: postgres_estoque_db
     restart: always
     ports:
-      # Mapeia a porta 3306 do container para a porta 3306 da sua máquina (localhost)
-      - "3306:3306"
+      # A porta padrão do PostgreSQL é 5432
+      - "5432:5432"
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: estoque_db
+      # O PostgreSQL usa variáveis diferentes do MySQL
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password # Senha para o desenvolvimento local
+      POSTGRES_DB: estoque_db
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mysql_data:
+  postgres_data:
