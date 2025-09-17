@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Gerenciador de Estoque</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="auth-section">
+        <div id="user-info"></div>
+        <button id="logout-button" class="btn-danger">Logout</button>
+    </div>
+
+    <div class="container">
+        <div id="admin-controls" style="display: none;">
+            <h2>Adicionar Novo Produto</h2>
+            <form id="create-form">
+                <input type="text" id="name" placeholder="Nome do Produto" required>
+                <input type="number" id="price" placeholder="Preço" step="0.01" required>
+                <input type="number" id="stock" placeholder="Estoque" required>
+                <button type="submit" class="btn-primary">Adicionar</button>
+            </form>
+        </div>
+
+        <h2>Produtos Cadastrados</h2>
+        <ul id="products-list" class="product-list"></ul>
+    </div>
+
+    <script>
+        const apiUrl = 'https://sua-api.onrender.com'; // <-- COLOQUE SUA URL AQUI
+        const token = localStorage.getItem('token');
+        const userInfo = document.getElementById('user-info');
+        const logoutButton = document.getElementById('logout-button');
+        const adminControls = document.getElementById('admin-controls');
+        const productList = document.getElementById('products-list');
+        const createForm = document.getElementById('create-form');
+
+        // GUARDA DE ROTA: Verifica se o usuário está logado
+        if (!token) {
+            window.location.href = '/index.html'; // Se não tiver token, volta para o login
+        }
+
+        function decodeJwt(token) {
+            return JSON.parse(atob(token.split('.')[1]));
+        }
+        const userData = decodeJwt(token);
+
+        // RENDERIZAÇÃO INICIAL DA UI
+        function renderUI() {
+            userInfo.innerText = `Logado como: ${userData.username} (Role: ${userData.role})`;
+            if (userData.role === 'admin') {
+                adminControls.style.display = 'block';
+            }
+            fetchProducts();
+        }
+
+        // FUNÇÃO DE LOGOUT
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = '/index.html';
+        });
+
+        // FUNÇÕES DE PRODUTOS
+        async function fetchProducts() {
+            const response = await fetch(`${apiUrl}/products`);
+            const products = await response.json();
+            productList.innerHTML = '';
+            products.forEach(product => {
+                const listItem = document.createElement('li');
+                listItem.className = 'product';
+                let adminButtons = '';
+                if (userData.role === 'admin') {
+                    adminButtons = `<div class="product-actions"><button class="btn-danger" onclick='handleDelete("${product.id}")'>Deletar</button></div>`;
+                }
+                listItem.innerHTML = `
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p>Preço: R$ ${parseFloat(product.price).toFixed(2)} | Estoque: ${product.stock}</p>
+                    </div>
+                    ${adminButtons}
+                `;
+                productList.appendChild(listItem);
+            });
+        }
+
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newProduct = {
+                name: document.getElementById('name').value,
+                price: parseFloat(document.getElementById('price').value),
+                stock: parseInt(document.getElementById('stock').value),
+            };
+            await fetch(`${apiUrl}/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(newProduct),
+            });
+            createForm.reset();
+            fetchProducts();
+        });
+
+        async function handleDelete(id) {
+            if (!confirm('Tem certeza?')) return;
+            await fetch(`${apiUrl}/products/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            fetchProducts();
+        }
+
+        // INICIA A PÁGINA
+        renderUI();
+    </script>
+</body>
+</html>
