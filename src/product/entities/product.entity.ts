@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Role } from '../../user/entities/role.enum';
 
 // O decorator @Entity() diz ao TypeORM: "Esta classe é um modelo de uma tabela do banco de dados".
 @Entity({ name: 'products' }) // Opcional: podemos dar um nome específico para a tabela.

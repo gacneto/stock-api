@@ -1,3 +1,5 @@
+/* public/style.css (VERSÃO FINAL E RESPONSIVA) */
+
 :root {
     --primary-color: #007bff;
     --danger-color: #dc3545;
@@ -5,12 +7,21 @@
     --dark-gray: #343a40;
     --border-color: #dee2e6;
 }
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: var(--light-gray);
     margin: 0;
     color: var(--dark-gray);
 }
+
+/* --- CORREÇÃO DA FONTE --- */
+/* Garante que os elementos de formulário herdem a fonte do body */
+input, textarea, button {
+    font-family: inherit;
+}
+/* ------------------------- */
+
 .container {
     max-width: 900px;
     margin: 2rem auto;
@@ -19,30 +30,45 @@ body {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
 h1, h2 {
     text-align: center;
     color: var(--dark-gray);
 }
+
 form {
     display: flex;
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
+
 input, button {
     padding: 0.8rem;
     border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
 }
+
+textarea {
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 80px;
+}
+
 button {
     cursor: pointer;
     color: white;
     border: none;
     font-weight: bold;
 }
+
 .btn-primary { background-color: var(--primary-color); }
 .btn-danger { background-color: var(--danger-color); }
+
 .auth-section {
     display: flex;
     justify-content: space-between;
@@ -51,6 +77,75 @@ button {
     background: var(--dark-gray);
     color: white;
 }
-.product-list { list-style: none; padding: 0; }
-.product { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); }
-.product-info h3 { margin: 0; }
+
+.product-list, .user-list {
+    list-style: none;
+    padding: 0;
+}
+
+.product, .user {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    gap: 1rem; /* Adiciona um espaço entre os elementos */
+}
+
+.item-info, .product-info {
+    flex-grow: 1; /* Permite que esta área cresça */
+}
+
+.item-info h3, .product-info h3 { margin: 0; }
+.item-info p, .product-info p { margin: 5px 0 0; color: #555; }
+
+.product-actions button, .user-actions button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+    white-space: nowrap; /* Impede que o texto do botão quebre a linha */
+}
+
+.edit-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+.close-button {
+    background: none;
+    border: none;
+    color: var(--dark-gray);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* --- REGRAS DE RESPONSIVIDADE (PARA TELAS MENORES) --- */
+@media (max-width: 768px) {
+    .container {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.4rem; }
+
+    /* Mudança principal: empilha os itens em vez de deixá-los lado a lado */
+    .product, .user {
+        flex-direction: column;
+        align-items: flex-start; /* Alinha tudo à esquerda */
+    }
+
+    .product-actions, .user-actions {
+        margin-top: 1rem; /* Adiciona espaço acima dos botões */
+        width: 100%;
+        display: flex;
+        justify-content: flex-end; /* Joga os botões para a direita */
+    }
+    
+    .auth-section {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.8rem 1rem;
+    }
+}
