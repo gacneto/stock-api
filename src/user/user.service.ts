@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'; // 1. Importe o bcrypt
+import { Role } from './entities/role.enum';
 
 @Injectable()
 export class UserService {
@@ -26,6 +27,7 @@ export class UserService {
     const newUser = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword, // 4. Salve a senha criptografada
+      role: Role.Admin,
     });
 
     try {
