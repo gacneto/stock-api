@@ -47,7 +47,7 @@ Para rodar este projeto no seu ambiente de desenvolvimento, siga os passos abaix
 
 1.  **Clone o repositório:**
     ```bash
-    git clone [https://github.com/gacneto/stock-api.git](https://github.com/gacneto/stock-api.git)
+    git clone [https://github.com/gacneto/stock-api.git]
     cd stock-api
     ```
 
