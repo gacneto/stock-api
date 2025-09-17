@@ -27,7 +27,7 @@ export class UserService {
     const newUser = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword, // 4. Salve a senha criptografada
-      role: Role.Admin,
+      //role: Role.Admin,
     });
 
     try {
