@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <title>Dashboard - Gerenciador de Estoque</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ESTILOS ESPECÍFICOS PARA TEXTAREA, IGUALANDO AOS INPUTS */
+        textarea {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            resize: vertical; /* Permite redimensionar verticalmente */
+            min-height: 80px; /* Altura mínima para a textarea */
+        }
+        .edit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--dark-gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
     <div class="auth-section">
@@ -25,7 +50,10 @@
 
         <div id="edit-product-container" style="display: none;">
             <hr>
-            <h2>Editar Produto</h2>
+            <div class="edit-header">
+                <h2>Editar Produto</h2>
+                <button class="close-button" onclick="hideEditForm()">X</button>
+            </div>
             <form id="edit-form">
                 <input type="hidden" id="edit-id">
                 <input type="text" id="edit-name" placeholder="Nome do Produto" required>
@@ -42,7 +70,7 @@
     </div>
 
     <script>
-        const apiUrl = 'https://my-stock-api-2xg6.onrender.com'; 
+        const apiUrl = 'https://my-stock-api-2xg6.onrender.com';
         const token = localStorage.getItem('token');
 
         // Referências aos elementos do DOM
@@ -86,7 +114,6 @@
                 const listItem = document.createElement('li');
                 listItem.className = 'product';
                 let adminButtons = '';
-                // BOTÃO DE EDITAR ADICIONADO
                 if (userData.role === 'admin') {
                     adminButtons = `
                         <div class="product-actions">
@@ -108,41 +135,67 @@
 
         createForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            // CAPTURA DO CAMPO DE DESCRIÇÃO ADICIONADO
             const newProduct = {
                 name: document.getElementById('name').value,
                 description: document.getElementById('description').value,
                 price: parseFloat(document.getElementById('price').value),
                 stock: parseInt(document.getElementById('stock').value),
             };
-            await fetch(`${apiUrl}/products`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(newProduct),
-            });
+            // Adicionei uma validação simples para a descrição, caso venha vazia
+            if (newProduct.description.trim() === '') {
+                delete newProduct.description; // Remove o campo se estiver vazio para não enviar string vazia
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/products`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(newProduct),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Erro ao criar produto: ${errorData.message || response.statusText}`);
+                }
+            } catch (error) {
+                alert('Falha ao se conectar com a API para criar produto.');
+                console.error('Erro na criação:', error);
+            }
             createForm.reset();
             fetchProducts();
         });
 
         async function handleDelete(id) {
-            if (!confirm('Tem certeza?')) return;
-            await fetch(`${apiUrl}/products/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
+            if (!confirm('Tem certeza que deseja deletar este PRODUTO? A ação é permanente.')) return;
+            try {
+                const response = await fetch(`${apiUrl}/products/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Erro ao deletar produto: ${errorData.message || response.statusText}`);
+                }
+            } catch (error) {
+                alert('Falha ao se conectar com a API para deletar produto.');
+                console.error('Erro na exclusão:', error);
+            }
             fetchProducts();
         }
 
-        // --- FUNÇÕES DE EDIÇÃO (NOVAS!) ---
+        // --- FUNÇÕES DE EDIÇÃO (CORRIGIDAS E COM NOVO BOTÃO) ---
         function showEditForm(product) {
             editProductContainer.style.display = 'block';
             document.getElementById('edit-id').value = product.id;
             document.getElementById('edit-name').value = product.name;
-            document.getElementById('edit-description').value = product.description;
+            document.getElementById('edit-description').value = product.description || ''; // Garante string vazia, não 'null'
             document.getElementById('edit-price').value = product.price;
             document.getElementById('edit-stock').value = product.stock;
-            // Rola a página para o formulário de edição
             editProductContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideEditForm() {
+            editProductContainer.style.display = 'none';
+            editForm.reset(); // Limpa o formulário de edição
         }
 
         editForm.addEventListener('submit', async (e) => {
@@ -155,12 +208,27 @@
                 stock: parseInt(document.getElementById('edit-stock').value),
             };
 
-            await fetch(`${apiUrl}/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(updatedProductData),
-            });
-            editProductContainer.style.display = 'none'; // Esconde o formulário
+            // Adicionei uma validação simples para a descrição, caso venha vazia
+            if (updatedProductData.description.trim() === '') {
+                updatedProductData.description = null; // Envia null para a API, para limpar a descrição
+            }
+
+            try {
+                // CORREÇÃO AQUI: A URL da requisição PATCH estava faltando /products
+                const response = await fetch(`${apiUrl}/products/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(updatedProductData),
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Erro ao atualizar produto: ${errorData.message || response.statusText}`);
+                }
+            } catch (error) {
+                alert('Falha ao se conectar com a API para atualizar produto.');
+                console.error('Erro na atualização:', error);
+            }
+            hideEditForm(); // Esconde o formulário usando a nova função
             fetchProducts(); // Atualiza a lista
         });
 
