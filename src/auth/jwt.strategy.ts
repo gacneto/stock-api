@@ -22,6 +22,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * @param payload O conteúdo que colocamos dentro do token ao fazer o login (id e username)
    */
   async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username };
+    return {
+      userId: payload.sub,
+      username: payload.username,
+      role: payload.role,
+    };
   }
 }

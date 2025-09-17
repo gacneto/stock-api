@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Role } from '../../user/entities/role.enum';
 
 // O decorator @Entity() diz ao TypeORM: "Esta classe é um modelo de uma tabela do banco de dados".
 @Entity({ name: 'products' }) // Opcional: podemos dar um nome específico para a tabela.
@@ -16,7 +17,7 @@ export class Product {
 
   // @Column() marca uma propriedade como uma coluna na tabela.
   @Column({ type: 'varchar', length: 100, nullable: false }) // varchar = texto com limite de tamanho
-  name: string;                                              // nullable: false = campo obrigatório
+  name: string; // nullable: false = campo obrigatório
 
   @Column({ type: 'text', nullable: true }) // text = texto longo, nullable: true = campo opcional
   description: string;
